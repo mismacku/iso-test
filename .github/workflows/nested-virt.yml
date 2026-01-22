@@ -28,18 +28,45 @@ jobs:
           sudo modprobe kvm_intel || sudo modprobe kvm_amd || true
           lsmod | grep -E '^kvm' || true
 
+      - name: Verify /dev/kvm exists and is accessible
+        run: |
+          if [ ! -c /dev/kvm ]; then
+            echo "/dev/kvm is missing; nested virtualization is not available on this runner." >&2
+            exit 1
+          fi
+          if [ ! -r /dev/kvm ] || [ ! -w /dev/kvm ]; then
+            echo "/dev/kvm exists but is not readable/writable by $(id -un)." >&2
+            ls -l /dev/kvm
+            id
+            echo "Continuing; Packer will run under sudo." >&2
+          fi
+          if ! sudo -n test -r /dev/kvm -a -w /dev/kvm; then
+            echo "sudo cannot access /dev/kvm; nested virtualization is not available on this runner." >&2
+            exit 1
+          fi
+
       - name: Setup Packer
         uses: hashicorp/setup-packer@v2
         with:
           version: "latest"
 
+      - name: Resolve Packer path
+        id: packer-path
+        run: |
+          PACKER_BIN="$(command -v packer)"
+          if [ -z "$PACKER_BIN" ]; then
+            echo "packer not found on PATH" >&2
+            exit 1
+          fi
+          echo "bin=$PACKER_BIN" >> "$GITHUB_OUTPUT"
+
       - name: Packer init
-        run: packer init packer
+        run: sudo -E "${{ steps.packer-path.outputs.bin }}" init packer
 
       - name: Packer validate
-        run: packer validate packer/nested-virt.pkr.hcl
+        run: sudo -E "${{ steps.packer-path.outputs.bin }}" validate packer/nested-virt.pkr.hcl
 
       - name: Packer build (requires nested virtualization)
         env:
           PACKER_LOG: "1"
-        run: packer build -color=false packer/nested-virt.pkr.hcl
+        run: sudo -E "${{ steps.packer-path.outputs.bin }}" build -color=false packer/nested-virt.pkr.hcl

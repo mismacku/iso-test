@@ -34,16 +34,18 @@ variable "ssh_password" {
 
 source "qemu" "cirros" {
   disk_image = true
-  iso_url    = "https://download.cirros-cloud.net/0.6.2/cirros-0.6.2-x86_64-disk.img"
+  iso_url    = "https://download.cirros-cloud.net/0.6.2/cirros-0.6.2-aarch64-disk.img"
   iso_checksum = "none"
 
-  output_directory = "output/cirros-kvm-test"
+  output_directory = "output/cirros-kvm-test-aarch64"
   format           = "qcow2"
   cd_label         = "cidata"
   cd_files         = ["packer/cloud-init/meta-data", "packer/cloud-init/user-data"]
 
+  qemu_binary = "qemu-system-aarch64"
+  machine_type = "virt"
   accelerator = var.accelerator
-  cpu_model   = var.accelerator == "kvm" ? "host" : "qemu64"
+  cpu_model   = var.accelerator == "kvm" ? "host" : "cortex-a57"
   headless    = true
 
   communicator     = "ssh"

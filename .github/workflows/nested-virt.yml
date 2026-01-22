@@ -45,6 +45,11 @@ jobs:
         with:
           version: "latest"
 
+      - name: Prepare EFI vars (AAVMF)
+        run: |
+          mkdir -p builds/opensuse/leap-16/aarch64/efi
+          sudo cp /usr/share/AAVMF/AAVMF_VARS.fd builds/opensuse/leap-16/aarch64/efi/edk2-aarch64-vars.fd
+
       - name: Resolve Packer path
         id: packer-path
         run: |
@@ -61,10 +66,14 @@ jobs:
       - name: Packer validate
         env:
           PKR_VAR_accelerator: ${{ steps.accel.outputs.accel }}
+          PKR_VAR_efi_firmware_code: /usr/share/AAVMF/AAVMF_CODE.fd
+          PKR_VAR_efi_firmware_vars: builds/opensuse/leap-16/aarch64/efi/edk2-aarch64-vars.fd
         run: sudo -E "${{ steps.packer-path.outputs.bin }}" validate packer/nested-virt.pkr.hcl
 
       - name: Packer build (requires nested virtualization)
         env:
           PACKER_LOG: "1"
           PKR_VAR_accelerator: ${{ steps.accel.outputs.accel }}
+          PKR_VAR_efi_firmware_code: /usr/share/AAVMF/AAVMF_CODE.fd
+          PKR_VAR_efi_firmware_vars: builds/opensuse/leap-16/aarch64/efi/edk2-aarch64-vars.fd
         run: sudo -E "${{ steps.packer-path.outputs.bin }}" build -color=false packer/nested-virt.pkr.hcl

@@ -39,8 +39,7 @@ source "qemu" "cirros" {
 
   output_directory = "output/cirros-kvm-test-aarch64"
   format           = "qcow2"
-  cd_label         = "cidata"
-  cd_files         = ["packer/cloud-init/meta-data", "packer/cloud-init/user-data"]
+  http_directory   = "packer/cloud-init"
 
   qemu_binary = "qemu-system-aarch64"
   machine_type = "virt"
@@ -51,14 +50,15 @@ source "qemu" "cirros" {
   communicator     = "ssh"
   ssh_username     = var.ssh_username
   ssh_password     = var.ssh_password
-  ssh_timeout      = "5m"
+  ssh_timeout      = "15m"
   ssh_pty          = true
   shutdown_command = "echo '${var.ssh_password}' | sudo -S poweroff"
   shutdown_timeout = "5m"
 
   qemuargs = [
     ["-m", "${var.memory}M"],
-    ["-smp", "${var.cpus}"]
+    ["-smp", "${var.cpus}"],
+    ["-smbios", "type=1,serial=ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/"]
   ]
 }
 

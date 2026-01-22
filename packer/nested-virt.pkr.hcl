@@ -39,6 +39,8 @@ source "qemu" "cirros" {
 
   output_directory = "output/cirros-kvm-test"
   format           = "qcow2"
+  cd_label         = "cidata"
+  cd_files         = ["packer/cloud-init/meta-data", "packer/cloud-init/user-data"]
 
   accelerator = var.accelerator
   cpu_model   = var.accelerator == "kvm" ? "host" : "qemu64"

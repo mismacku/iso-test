@@ -1,0 +1,8 @@
+#cloud-config
+users:
+  - default
+ssh_pwauth: true
+chpasswd:
+  list: |
+    cirros:cubswin:)
+  expire: false

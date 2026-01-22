@@ -29,7 +29,7 @@ variable "ssh_username" {
 
 variable "ssh_password" {
   type    = string
-  default = "letsgocubs"
+  default = "gocubsgo"
 }
 
 source "qemu" "cirros" {

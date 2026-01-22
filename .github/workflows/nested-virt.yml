@@ -60,11 +60,11 @@ jobs:
 
       - name: Packer validate
         env:
-          PACKER_VAR_accelerator: ${{ steps.accel.outputs.accel }}
+          PKR_VAR_accelerator: ${{ steps.accel.outputs.accel }}
         run: sudo -E "${{ steps.packer-path.outputs.bin }}" validate packer/nested-virt.pkr.hcl
 
       - name: Packer build (requires nested virtualization)
         env:
           PACKER_LOG: "1"
-          PACKER_VAR_accelerator: ${{ steps.accel.outputs.accel }}
+          PKR_VAR_accelerator: ${{ steps.accel.outputs.accel }}
         run: sudo -E "${{ steps.packer-path.outputs.bin }}" build -color=false packer/nested-virt.pkr.hcl

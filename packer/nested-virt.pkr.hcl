@@ -29,7 +29,7 @@ variable "ssh_username" {
 
 variable "ssh_password" {
   type    = string
-  default = "cubswin:)"
+  default = "letsgocubs"
 }
 
 source "qemu" "cirros" {
@@ -39,7 +39,6 @@ source "qemu" "cirros" {
 
   output_directory = "output/cirros-kvm-test-aarch64"
   format           = "qcow2"
-  http_directory   = "packer/cloud-init"
 
   qemu_binary = "qemu-system-aarch64"
   machine_type = "virt"
@@ -57,8 +56,7 @@ source "qemu" "cirros" {
 
   qemuargs = [
     ["-m", "${var.memory}M"],
-    ["-smp", "${var.cpus}"],
-    ["-smbios", "type=1,serial=ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/"]
+    ["-smp", "${var.cpus}"]
   ]
 }
 

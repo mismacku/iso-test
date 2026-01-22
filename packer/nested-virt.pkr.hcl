@@ -31,7 +31,7 @@ source "qemu" "cirros" {
   format           = "qcow2"
 
   accelerator = var.accelerator
-  cpu_model   = "host"
+  cpu_model   = var.accelerator == "kvm" ? "host" : "qemu64"
   headless    = true
 
   communicator    = "none"

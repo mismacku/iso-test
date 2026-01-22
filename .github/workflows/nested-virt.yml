@@ -1,0 +1,45 @@
+name: Nested virtualization (Packer + QEMU)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/nested-virt.yml"
+      - "packer/**"
+
+jobs:
+  nested-virt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-kvm qemu-utils
+
+      - name: KVM diagnostics
+        run: |
+          uname -a
+          egrep -c '(vmx|svm)' /proc/cpuinfo || true
+          ls -l /dev/kvm || true
+          sudo modprobe kvm || true
+          sudo modprobe kvm_intel || sudo modprobe kvm_amd || true
+          lsmod | grep -E '^kvm' || true
+
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@v2
+        with:
+          version: "latest"
+
+      - name: Packer init
+        run: packer init packer
+
+      - name: Packer validate
+        run: packer validate packer/nested-virt.pkr.hcl
+
+      - name: Packer build (requires nested virtualization)
+        env:
+          PACKER_LOG: "1"
+        run: packer build -color=false packer/nested-virt.pkr.hcl
